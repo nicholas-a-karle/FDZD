@@ -1,4 +1,7 @@
 import tkinter as tk
+import tkinter.font as font
+from pathlib import Path
+from PIL import Image, ImageTk
 
 class Page(tk.Frame):
     def __init__(self, parent, controller):
@@ -8,39 +11,43 @@ class Page(tk.Frame):
 class StartMenu(Page):
     def __init__(self, parent, controller):
         Page.__init__(self, parent, controller)
-        self.controller = controller
 
-        start_button = tk.Button(self, text="Start Game", command=controller.start_game)
-        quit_button = tk.Button(self, text="Quit Game", command=controller.quit_game)
+        sh = controller.winfo_screenheight() / 10
+        sw = controller.winfo_screenwidth() / 10
 
-        start_button.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
-        quit_button.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+        border_label = tk.Label(self, image = self.controller.border_photo)
+        border_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        border_label.image=controller.border_photo
+
+        start_button = tk.Button(self, text="Start Game", command=controller.start_game, width = int(sw * 0.15), height = int(sh * 0.04))
+        quit_button = tk.Button(self, text="Quit Game", command=controller.quit_game, width = int(sw * 0.15), height = int(sh * 0.04))
+
+        start_button.place(relx=0.5, rely=0.35, anchor=tk.CENTER)
+        quit_button.place(relx=0.5, rely=0.65, anchor=tk.CENTER)
+
+        title_label = tk.Label(self, text="FrienDZoneD", font=font.Font(family="Helvetica", size=45, weight="bold", underline=True))
+        title_label.place(relx=0.5, rely=0.2, anchor=tk.CENTER)
+
+        
 
     
 class GameFrame(Page):
     def __init__(self, parent, controller):
         Page.__init__(self, parent, controller)
 
-        quit_button = tk.Button(self, text="Quit Game", command=controller.quit_game)
-        quit_button.place(relx=0.95, rely=0.05, anchor=tk.CENTER)
+        sh = controller.winfo_screenheight()
+        sw = controller.winfo_screenwidth()
+
+        self.quit_button = tk.Button(self, text="Quit Game", command=controller.quit_game, width = int(sw * 0.006), height = int(sh * 0.0015))
+        self.menu_button = tk.Button(self, text="Menu", command=controller.open_game_menu)
+
+        self.border_label = tk.Label(self, image = controller.border_photo)
+        self.border_label.image=controller.border_photo
 
         self.buttons = []
         self.labels = []
-        num = len(controller.dialogue)
-        for i in range(1, num):
-            self.buttons.append(
-                tk.Button(self, text=str(i)+".", 
-                command=lambda response = i: controller.dialogue_respond(response))
-            )
-            self.buttons[i-1].place(relx=0.1, rely=0.7 + 0.05 * i)
-
-        if (num > 0):
-            self.labels.append(tk.Label(self, text=controller.dialogue[0]))
-            self.labels[0].place(relx=0.1, rely=0.6)
-        for i in range(1, num):
-            self.labels.append(tk.Label(self, text=controller.dialogue[i]))
-            self.labels[i].place(relx=0.12, rely=0.7 + 0.05 * i)
-
+        self.redraw()
+        
     def redraw(self):
         for label in self.labels:
             label.destroy()
@@ -48,24 +55,62 @@ class GameFrame(Page):
             button.destroy()
         self.buttons = []
         self.labels = []
-        num = len(self.controller.dialogue)
-        for i in range(1, num):
-            self.buttons.append(
-                tk.Button(self, text=str(i)+".", 
-                command=lambda response = i: self.controller.dialogue_respond(response))
-            )
-            self.buttons[i-1].place(relx=0.1, rely=0.7 + 0.05 * i)
 
-        if (num > 0):
-            self.labels.append(tk.Label(self, text=self.controller.dialogue[0]))
-            self.labels[0].place(relx=0.1, rely=0.6)
-        for i in range(1, num):
-            self.labels.append(tk.Label(self, text=self.controller.dialogue[i]))
-            self.labels[i].place(relx=0.12, rely=0.7 + 0.05 * i)
+        sh = self.controller.winfo_screenheight()
+        sw = self.controller.winfo_screenwidth()
+        image_width = int(sw * 0.8)
+        image_height = int(sh * 0.5)
+
+        num = len(self.controller.dialogue["responses"])
+        for i in range(num):
+            self.buttons.append(
+                tk.Button(self, text=self.controller.dialogue["responses"][i],
+                command=lambda response = i: self.controller.dialogue_respond(response)
+                )
+            )
+            self.buttons[i].place(relx=0.12, rely=0.7 + 0.04 * i)
+
+
+        self.labels.append(tk.Label(self, text=self.controller.dialogue["dialogue"]))
+        self.labels[0].place(relx=0.14, rely=0.65, anchor=tk.CENTER)
+
+        photo = Image.open(self.controller.dialogue["image"])
+        photo = photo.resize((image_width, image_height), Image.Resampling.BICUBIC)
+        photo = ImageTk.PhotoImage(photo)
+
+        self.labels.append(tk.Label(self, image=photo))
+        #self.labels[1].place(relx=0.1, rely=0.1)
+        self.labels[1].image = photo
+        
+        self.border_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.quit_button.place(relx=0.75, rely=0.9, anchor=tk.CENTER)
+        self.menu_button.place(relx=0.25, rely=0.9, anchor=tk.CENTER)
+        self.menu_button.lift()
+        self.quit_button.lift()
+        
+        
+        
     
 class GameMenu(Page):
     def __init__(self, parent, controller):
         Page.__init__(self, parent, controller)
+        self.controller = controller
+
+        sh = controller.winfo_screenheight() / 10
+        sw = controller.winfo_screenwidth() / 10
+
+        border_label = tk.Label(self, image = self.controller.border_photo)
+        border_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        border_label.image=controller.border_photo
+
+        resume_button = tk.Button(self, text="Resume", command=controller.start_game, width = int(sw * 0.15), height = int(sh * 0.04))
+        start_button = tk.Button(self, text="Exit to Menu", command=controller.start_menu, width = int(sw * 0.15), height = int(sh * 0.04))
+        quit_button = tk.Button(self, text="Quit Game", command=controller.quit_game, width = int(sw * 0.15), height = int(sh * 0.04))
+
+        resume_button.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
+        start_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        quit_button.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+
 
 class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -78,12 +123,17 @@ class Window(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        self.dialogue=[
-            "Test Dialogue 1",
-            "Go to 1",
-            "Go to 2",
-            "Go to 3"
-            ]
+        self.border_photo = Image.open("resources/border.png")
+        self.border_photo = self.border_photo.resize((int(self.winfo_screenwidth()), int(self.winfo_screenheight())), Image.Resampling.BICUBIC)
+        self.border_photo = ImageTk.PhotoImage(self.border_photo)
+
+        self.dialogue={
+            "dialogue": "Test Dialogue 1",
+            "image": "resources/larry.jpg",
+            "responses": ["Go to 1", "Go to 2", "Go to 3"]
+        }
+
+        self.bind("<Escape>", self.esc_game)
         
         self.frames={}
         for f in (StartMenu, GameFrame, GameMenu):
@@ -91,7 +141,7 @@ class Window(tk.Tk):
             frame = f(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-        self.show_page("StartMenu")
+        self.start_menu()
 
     def show_page(self, page):
         frame = self.frames[page]
@@ -100,27 +150,33 @@ class Window(tk.Tk):
     def quit_game(self):
         self.quit()
         return 0
+    
+    def esc_game(self, event):
+        self.quit()
+        return event
+    
+    def start_menu(self):
+        self.show_page("StartMenu")
+
+    def open_game_menu(self):
+        self.show_page("GameMenu")
 
     def start_game(self):
         self.show_page("GameFrame")
-        return -1
     
     def dialogue_respond(self, response_index):
         print(response_index)
-        if response_index == 1:
-            self.dialogue[0] = "Test Dialogue 1"
+        if response_index == 0:
+            self.dialogue["dialogue"] = "Test Dialogue 1"
+        elif response_index == 1:
+            self.dialogue["dialogue"] = "Test Dialogue 2"
         elif response_index == 2:
-            self.dialogue[0] = "Test Dialogue 2"
-        elif response_index == 3:
-            self.dialogue[0] = "Test Dialogue 3"
+            self.dialogue["dialogue"] = "Test Dialogue 3"
         self.frames["GameFrame"].redraw()
 
-    def init_menu(self):
-        # TODO: Do this
-        return -1
-
     def run(self):
-        self.mainloop()
+        if Path("resources/coconut.jpg").exists():
+            self.mainloop()
         return 0
 
 if __name__ == "__main__":
