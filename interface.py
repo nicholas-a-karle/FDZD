@@ -61,26 +61,18 @@ class GameFrame(Page):
         image_width = int(sw * 0.8)
         image_height = int(sh * 0.5)
 
-        num = len(self.controller.dialogue["responses"])
+        num = len(self.controller.dialogue["options"])
         for i in range(num):
             self.buttons.append(
-                tk.Button(self, text=self.controller.dialogue["responses"][i],
+                tk.Button(self, text=self.controller.dialogue["options"][i],
                 command=lambda response = i: self.controller.dialogue_respond(response)
                 )
             )
             self.buttons[i].place(relx=0.12, rely=0.7 + 0.04 * i)
 
 
-        self.labels.append(tk.Label(self, text=self.controller.dialogue["dialogue"]))
+        self.labels.append(tk.Label(self, text=self.controller.dialogue["npctext"]))
         self.labels[0].place(relx=0.14, rely=0.65, anchor=tk.CENTER)
-
-        photo = Image.open(self.controller.dialogue["image"])
-        photo = photo.resize((image_width, image_height), Image.Resampling.BICUBIC)
-        photo = ImageTk.PhotoImage(photo)
-
-        self.labels.append(tk.Label(self, image=photo))
-        #self.labels[1].place(relx=0.1, rely=0.1)
-        self.labels[1].image = photo
         
         self.border_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.quit_button.place(relx=0.75, rely=0.9, anchor=tk.CENTER)
@@ -128,9 +120,8 @@ class Window(tk.Tk):
         self.border_photo = ImageTk.PhotoImage(self.border_photo)
 
         self.dialogue={
-            "dialogue": "Test Dialogue 1",
-            "image": "resources/larry.jpg",
-            "responses": ["Go to 1", "Go to 2", "Go to 3"]
+            "npctext": "Test Dialogue 1",
+            "options": ["Go to 1", "Go to 2", "Go to 3"]
         }
 
         self.bind("<Escape>", self.esc_game)
@@ -167,11 +158,11 @@ class Window(tk.Tk):
     def dialogue_respond(self, response_index):
         print(response_index)
         if response_index == 0:
-            self.dialogue["dialogue"] = "Test Dialogue 1"
+            self.dialogue["npctext"] = "Test Dialogue 1"
         elif response_index == 1:
-            self.dialogue["dialogue"] = "Test Dialogue 2"
+            self.dialogue["npctext"] = "Test Dialogue 2"
         elif response_index == 2:
-            self.dialogue["dialogue"] = "Test Dialogue 3"
+            self.dialogue["npctext"] = "Test Dialogue 3"
         self.frames["GameFrame"].redraw()
 
     def run(self):
