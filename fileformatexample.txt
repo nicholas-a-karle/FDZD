@@ -1,0 +1,21 @@
+# 0
+Austin: Hi how are you?
+	Great! How are you? ADD 5 anger GOTO 1 
+	Terrible, because of you! ADD 10 like GOTO 2
+	Edge Example A GOTO 3
+	Edge Example B GOTO 3
+Node Example A
+	Edge Example A GOTO 3
+	Edge Example B GOTO 3
+	Edge Example C GOTO 3
+	Edge Example D GOTO 3
+Node Example B
+	Edge Example A GOTO 3
+	Edge Example B GOTO 3
+	Edge Example C GOTO 3
+	Edge Example D GOTO 3
+Node Example C
+	Edge Example A GOTO 3
+	Edge Example B GOTO 3
+	Edge Example C GOTO 3
+	Edge Example D GOTO 3
